@@ -1,5 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  // MENU MOBILE
+  const navToggle = document.querySelector('.nav-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      const abierto = navLinks.classList.toggle('open');
+      navToggle.classList.toggle('is-open', abierto);
+      navToggle.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+    });
+    navLinks.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        navToggle.classList.remove('is-open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+
   // TABS CARTA
   const tabs = document.querySelectorAll('.tab');
   const grids = document.querySelectorAll('.menu-grid');
