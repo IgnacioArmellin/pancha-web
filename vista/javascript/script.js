@@ -15,20 +15,34 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ANIMACIÓN SCROLL
-  const observer = new IntersectionObserver((entries) => {
+  const animados = document.querySelectorAll('.menu-item, .promo-card, .valor-item, .info-card, .stat');
+
+  const mostrar = (el) => {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+  };
+
+  const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
+        mostrar(entry.target);
+        obs.unobserve(entry.target);
       }
     });
   }, { threshold: 0.1 });
 
-  document.querySelectorAll('.menu-item, .promo-card, .valor-item, .info-card, .stat').forEach(el => {
+  animados.forEach(el => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(16px)';
     el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     observer.observe(el);
+  });
+
+  // Red de seguridad: nada puede quedar invisible si el observer no se dispara
+  window.addEventListener('load', () => {
+    setTimeout(() => animados.forEach(el => {
+      if (getComputedStyle(el).opacity === '0') mostrar(el);
+    }), 700);
   });
 
 });
