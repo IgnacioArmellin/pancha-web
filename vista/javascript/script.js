@@ -63,4 +63,105 @@ document.addEventListener('DOMContentLoaded', () => {
     }), 700);
   });
 
+  // ARMADOR DE PEDIDO (solo en la carta)
+  const menuSection = document.querySelector('.menu-section');
+  const pedidoEl = document.getElementById('pedido');
+  if (menuSection && pedidoEl) {
+    const WA = 'https://wa.me/5491164916021';
+    const CATS = { pizzas: 'pizza', empanadas: 'empanada', milanesas: 'milanesa' };
+    const parsePrecio = (t) => parseInt((t || '').replace(/[^\d]/g, ''), 10) || 0;
+    const fmt = (n) => '$' + n.toLocaleString('es-AR');
+
+    let pedido = []; // { clave, nombre, cat, precio, cant }
+
+    const countEl = document.getElementById('pedido-count');
+    const totalEl = document.getElementById('pedido-total');
+    const itemsEl = document.getElementById('pedido-items');
+    const bodyEl = pedidoEl.querySelector('.pedido-body');
+    const headEl = pedidoEl.querySelector('.pedido-head');
+    const enviarEl = document.getElementById('pedido-enviar');
+    const vaciarEl = document.getElementById('pedido-vaciar');
+
+    // Botón "Agregar" en cada producto
+    menuSection.querySelectorAll('.menu-item').forEach((item) => {
+      const nombre = item.querySelector('h4')?.textContent.trim();
+      if (!nombre) return;
+      const precio = parsePrecio(item.querySelector('.price')?.textContent);
+      const cat = CATS[item.closest('.menu-grid')?.id] || '';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'add-pedido';
+      btn.textContent = 'Agregar';
+      btn.addEventListener('click', () => agregar(nombre, cat, precio));
+      item.appendChild(btn);
+    });
+
+    function agregar(nombre, cat, precio) {
+      const clave = cat + '|' + nombre;
+      const ex = pedido.find((p) => p.clave === clave);
+      if (ex) ex.cant++;
+      else pedido.push({ clave, nombre, cat, precio, cant: 1 });
+      if (bodyEl.hidden) bodyEl.hidden = false;
+      render();
+    }
+    function cambiar(clave, delta) {
+      const p = pedido.find((x) => x.clave === clave);
+      if (!p) return;
+      p.cant += delta;
+      if (p.cant <= 0) pedido = pedido.filter((x) => x.clave !== clave);
+      render();
+    }
+    function quitar(clave) {
+      pedido = pedido.filter((x) => x.clave !== clave);
+      render();
+    }
+    function vaciar() {
+      pedido = [];
+      bodyEl.hidden = true;
+      render();
+    }
+
+    const total = () => pedido.reduce((s, p) => s + p.precio * p.cant, 0);
+    const unidades = () => pedido.reduce((s, p) => s + p.cant, 0);
+
+    function render() {
+      const n = unidades();
+      document.body.classList.toggle('con-pedido', n > 0);
+      pedidoEl.hidden = n === 0;
+      countEl.textContent = n;
+      totalEl.textContent = fmt(total());
+
+      itemsEl.innerHTML = '';
+      pedido.forEach((p) => {
+        const li = document.createElement('li');
+        li.className = 'pedido-item';
+        const nombreTxt = p.nombre + (p.cat ? ' (' + p.cat + ')' : '');
+        li.innerHTML =
+          '<span class="nom"></span>' +
+          '<span class="pedido-qty"><button type="button" class="menos" aria-label="Restar uno">-</button>' +
+          '<span class="cant"></span>' +
+          '<button type="button" class="mas" aria-label="Sumar uno">+</button></span>' +
+          '<span class="sub"></span>' +
+          '<button type="button" class="quitar">Quitar</button>';
+        li.querySelector('.nom').textContent = nombreTxt;
+        li.querySelector('.cant').textContent = p.cant;
+        li.querySelector('.sub').textContent = fmt(p.precio * p.cant);
+        li.querySelector('.menos').addEventListener('click', () => cambiar(p.clave, -1));
+        li.querySelector('.mas').addEventListener('click', () => cambiar(p.clave, 1));
+        li.querySelector('.quitar').addEventListener('click', () => quitar(p.clave));
+        itemsEl.appendChild(li);
+      });
+
+      const lineas = pedido
+        .map((p) => '- ' + p.cant + 'x ' + p.nombre + (p.cat ? ' (' + p.cat + ')' : '') + ' - ' + fmt(p.precio * p.cant))
+        .join('\n');
+      const msg = 'Hola! Quiero hacer un pedido:\n' + lineas + '\n\nTotal: ' + fmt(total());
+      enviarEl.href = WA + '?text=' + encodeURIComponent(msg);
+    }
+
+    headEl.addEventListener('click', () => { bodyEl.hidden = !bodyEl.hidden; });
+    vaciarEl.addEventListener('click', vaciar);
+    render();
+  }
+
 });

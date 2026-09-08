@@ -100,6 +100,20 @@
     <p>Av. San Martín 386, Bella Vista · 011 6491-6021</p>
   </footer>
 
+  <div id="pedido" class="pedido" hidden>
+    <button type="button" class="pedido-head">
+      <span>Ver pedido (<span id="pedido-count">0</span>)</span>
+      <span class="pedido-total" id="pedido-total">$0</span>
+    </button>
+    <div class="pedido-body" hidden>
+      <ul id="pedido-items"></ul>
+      <div class="pedido-acciones">
+        <button type="button" id="pedido-vaciar" class="pedido-vaciar">Vaciar</button>
+        <a id="pedido-enviar" class="whatsapp-btn" href="https://wa.me/5491164916021" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+      </div>
+    </div>
+  </div>
+
   <script src="javascript/script.js"></script>
 
 </body>
